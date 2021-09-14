@@ -11,9 +11,9 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
 
-cron.schedule('0 8 * * *', () => {
+cron.schedule(`${process.env.CRON_TIME}`, () => {
     run();
-},{scheduled: false, timezone: 'Europe/Moscow'});
+},{scheduled: true, timezone: 'Europe/Moscow'});
 
 const run = async() => {
 
