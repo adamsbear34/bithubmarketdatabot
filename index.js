@@ -11,9 +11,9 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
 
-cron.schedule('* * * * *', () => {
-    run()
-});
+cron.schedule('0 8 * * *', () => {
+    run();
+},{scheduled: false, timezone: 'Europe/Moscow'});
 
 const run = async() => {
 
@@ -25,15 +25,23 @@ const run = async() => {
 
 };
 
+const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  });
+
+
 const FormatMarketData = (data) => {
 
     let post = ``;
     
 
     data.map(coin => {
-        post +=`
-<b>${coin.name}</b>                 ${coin.current_price}$
-`
+
+        sapces = getLine(coin.name, coin.current_price.toFixed(2), 25);
+        post += `
+<pre><b>${coin.name}</b>${sapces}${formatter.format(coin.current_price.toFixed(2))}</pre>  ${((coin.price_change_percentage_24h.toFixed(2) > 0) ? '🟢' : '🔴')}`;
 });
 
     return post;
@@ -41,11 +49,32 @@ const FormatMarketData = (data) => {
 
 
 
+
+const getLine = (txt, num, max) => {
+    var spacesNum = (max - (num.toString().length + txt.length));
+    var spaces = '';
+
+    if (num > 1000){
+        spacesNum -=1;
+    }else if(num > 100000){
+        spacesNum -=2;
+    }
+
+    while(spacesNum > 0){
+        spaces += ' ';
+        spacesNum--;
+    }
+    return spaces;
+};
+
+
+
+
 const sendMessage = (msg) => {
   
     try{
        // bot.telegram.sendMessage(`${process.env.CHAT_ID}`, msg, {parse_mode: 'HTML', disable_web_page_preview: true});
-        bot.telegram.sendPhoto(`${process.env.CHAT_ID}`, {source: './img/Add_Logo.png',}, {caption: msg, parse_mode: 'HTML'} );
+        bot.telegram.sendPhoto(`${process.env.CHAT_ID}`, {source: './img/price_cover.png',}, {caption: msg, parse_mode: 'HTML'} );
     }catch(err){
         console.log(err + ` ${msg}`);
     }
